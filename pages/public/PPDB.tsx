@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { getJurusan, createPendaftar } from '../../services/api';
 import { Jurusan } from '../../types';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { useToast } from '../../components/Toast';
 
 const PPDB: React.FC = () => {
   const [jurusan, setJurusan] = useState<Jurusan[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     nama: '',
@@ -18,7 +19,9 @@ const PPDB: React.FC = () => {
   });
 
   useEffect(() => {
-    getJurusan().then(setJurusan);
+    getJurusan().then(setJurusan).catch(() => {
+        showToast('Gagal memuat data jurusan.', 'error');
+    });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -28,14 +31,15 @@ const PPDB: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     
     try {
       await createPendaftar(formData);
+      showToast('Pendaftaran berhasil dikirim!', 'success');
       setSuccess(true);
       setFormData({ nama: '', asal_sekolah: '', jurusan_pilihan: '', no_hp: '', alamat: '' });
     } catch (err: any) {
-      setError(err.message || 'Gagal mendaftar. Silakan coba lagi.');
+      console.error(err);
+      showToast(err.message || 'Gagal mendaftar. Silakan coba lagi.', 'error');
     } finally {
       setLoading(false);
     }
@@ -70,12 +74,6 @@ const PPDB: React.FC = () => {
         </div>
         
         <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-6">
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 p-4 rounded-lg flex items-center gap-2 border dark:border-red-800">
-              <AlertCircle size={20} /> {error}
-            </div>
-          )}
-
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama Lengkap</label>

@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Lock, LogIn, AlertCircle } from 'lucide-react';
+import { Lock, LogIn } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Pre-filled credentials for development ease
+  const [email, setEmail] = useState('admin@sekolah.sch.id');
+  const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg('');
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ 
@@ -24,11 +25,12 @@ const Login: React.FC = () => {
       if (error) throw error;
 
       if (data.user) {
+        showToast('Login berhasil! Selamat datang.', 'success');
         navigate('/admin');
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMsg('Email atau password salah.');
+      showToast('Email atau password salah.', 'error');
     } finally {
       setLoading(false);
     }
@@ -44,13 +46,6 @@ const Login: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Admin Login</h1>
           <p className="text-gray-500 dark:text-gray-400">Masuk untuk mengelola website</p>
         </div>
-
-        {errorMsg && (
-          <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-600 dark:text-red-300 text-sm">
-            <AlertCircle size={16} />
-            {errorMsg}
-          </div>
-        )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>

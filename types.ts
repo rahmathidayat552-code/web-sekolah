@@ -57,9 +57,35 @@ export interface Galeri {
   created_at: string;
 }
 
+export interface Pesan {
+  id: string;
+  nama: string;
+  email: string;
+  no_hp: string;
+  subjek: string;
+  isi: string;
+  status: 'unread' | 'read' | 'replied';
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   nama: string;
   role: 'admin' | 'operator';
   created_at?: string;
+}
+
+export interface IdentitasSekolah {
+  id?: string;
+  nama_sekolah: string;
+  npsn: string;
+  alamat: string;
+  email: string;
+  no_tlp: string;
+  koordinat_ls: string;
+  koordinat_lb: string;
+  nama_kepsek: string;
+  nip_kepsek: string;
+  foto_kepsek: string | null;
+  logo_sekolah: string | null;
 }

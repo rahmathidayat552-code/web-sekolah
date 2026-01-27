@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getPendaftar, getAllBerita } from '../../services/api';
 import { Users, FileText, CheckCircle } from 'lucide-react';
+import { useToast } from '../../components/Toast';
 
 const Dashboard: React.FC = () => {
+  const { showToast } = useToast();
   const [stats, setStats] = useState({
     totalSiswa: 0,
     totalBerita: 0,
@@ -39,6 +41,7 @@ const Dashboard: React.FC = () => {
         setChartData(data);
       } catch (error) {
         console.error("Error loading dashboard data", error);
+        showToast('Gagal memuat data dashboard.', 'error');
       }
     };
 
