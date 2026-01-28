@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { getIdentitasSekolah } from '../services/api';
-import { IdentitasSekolah } from '../types';
+import { getIdentitasSekolah, getMedsos } from '../services/api';
+import { IdentitasSekolah, MedsosSekolah } from '../types';
 import { 
   Menu, X, LayoutDashboard, FileText, Users, LogOut, School, Phone, Home, Sun, Moon,
-  BookOpen, UserCheck, Megaphone, Image, Mail, Settings, UserCog, Share2
+  BookOpen, UserCheck, Megaphone, Image, Mail, Settings, UserCog, Share2,
+  Instagram, Facebook, Youtube, MessageCircle, Music
 } from 'lucide-react';
 
 const ThemeToggle = () => {
@@ -26,9 +27,22 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const [identitas, setIdentitas] = useState<IdentitasSekolah | null>(null);
+  const [medsos, setMedsos] = useState<MedsosSekolah | null>(null);
 
   useEffect(() => {
-    getIdentitasSekolah().then(setIdentitas).catch(console.error);
+    const fetchData = async () => {
+        try {
+            const [schoolData, medsosData] = await Promise.all([
+                getIdentitasSekolah(),
+                getMedsos()
+            ]);
+            setIdentitas(schoolData);
+            setMedsos(medsosData);
+        } catch (error) {
+            console.error("Failed to fetch layout data", error);
+        }
+    };
+    fetchData();
   }, []);
 
   const isActive = (path: string) => location.pathname === path 
@@ -110,9 +124,68 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
                  )}
                  <span className="font-bold text-lg uppercase">{schoolName}</span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
                 Mewujudkan generasi emas yang berkompeten, berkarakter, dan siap kerja di era industri 4.0.
               </p>
+              
+              {/* SOCIAL MEDIA ICONS */}
+              <div className="flex gap-3">
+                {medsos?.instagram && (
+                    <a 
+                        href={medsos.instagram.startsWith('http') ? medsos.instagram : `https://${medsos.instagram}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="bg-white/5 hover:bg-pink-600 p-2 rounded-lg transition-colors text-white border border-white/10"
+                        title="Instagram"
+                    >
+                        <Instagram size={18} />
+                    </a>
+                )}
+                {medsos?.facebook && (
+                    <a 
+                        href={medsos.facebook.startsWith('http') ? medsos.facebook : `https://${medsos.facebook}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="bg-white/5 hover:bg-blue-600 p-2 rounded-lg transition-colors text-white border border-white/10"
+                        title="Facebook"
+                    >
+                        <Facebook size={18} />
+                    </a>
+                )}
+                 {medsos?.youtube && (
+                    <a 
+                        href={medsos.youtube.startsWith('http') ? medsos.youtube : `https://${medsos.youtube}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="bg-white/5 hover:bg-red-600 p-2 rounded-lg transition-colors text-white border border-white/10"
+                        title="YouTube"
+                    >
+                        <Youtube size={18} />
+                    </a>
+                )}
+                {medsos?.tiktok && (
+                    <a 
+                        href={medsos.tiktok.startsWith('http') ? medsos.tiktok : `https://${medsos.tiktok}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="bg-white/5 hover:bg-black p-2 rounded-lg transition-colors text-white border border-white/10"
+                        title="TikTok"
+                    >
+                        <Music size={18} />
+                    </a>
+                )}
+                 {medsos?.whatsapp && (
+                    <a 
+                        href={medsos.whatsapp.startsWith('http') ? medsos.whatsapp : `https://${medsos.whatsapp}`} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="bg-white/5 hover:bg-green-600 p-2 rounded-lg transition-colors text-white border border-white/10"
+                        title="WhatsApp"
+                    >
+                        <MessageCircle size={18} />
+                    </a>
+                )}
+              </div>
             </div>
             <div>
               <h3 className="font-bold text-lg mb-4 text-accent">Navigasi</h3>
@@ -151,6 +224,7 @@ export const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { signOut, user } = useAuth();
+  const navigate = useNavigate(); // Hook untuk redirect
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [identitas, setIdentitas] = useState<IdentitasSekolah | null>(null);
@@ -158,6 +232,13 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     getIdentitasSekolah().then(setIdentitas).catch(console.error);
   }, []);
+
+  const handleLogout = async () => {
+    // Navigate ke home DULUAN sebelum signOut untuk menghindari 
+    // ProtectedRoute redirect ke /login karena session null
+    navigate('/', { replace: true });
+    await signOut();
+  };
 
   const navItems = [
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -235,7 +316,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         <div className="p-4 border-t border-gray-700 dark:border-slate-800 flex justify-between items-center bg-primary dark:bg-slate-900">
           <ThemeToggle />
           <button
-            onClick={signOut}
+            onClick={handleLogout}
             className="flex items-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded transition-colors text-sm font-medium"
           >
             <LogOut size={18} />
