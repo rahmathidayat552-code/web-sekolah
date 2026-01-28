@@ -6,7 +6,7 @@ import { getIdentitasSekolah } from '../services/api';
 import { IdentitasSekolah } from '../types';
 import { 
   Menu, X, LayoutDashboard, FileText, Users, LogOut, School, Phone, Home, Sun, Moon,
-  BookOpen, UserCheck, Megaphone, Image, Mail, Settings, UserCog
+  BookOpen, UserCheck, Megaphone, Image, Mail, Settings, UserCog, Share2
 } from 'lucide-react';
 
 const ThemeToggle = () => {
@@ -162,6 +162,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const navItems = [
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/identitas', label: 'Identitas Sekolah', icon: Settings },
+    { path: '/admin/medsos', label: 'Data Medsos', icon: Share2 },
     { path: '/admin/berita', label: 'Berita & Artikel', icon: FileText },
     { path: '/admin/pengumuman', label: 'Pengumuman', icon: Megaphone },
     { path: '/admin/jurusan', label: 'Jurusan', icon: BookOpen },

@@ -1,5 +1,6 @@
+
 import { supabase } from '../supabaseClient';
-import { Berita, Jurusan, PPDBPendaftar, Pengumuman, IdentitasSekolah, Guru, Galeri, Pesan, Profile } from '../types';
+import { Berita, Jurusan, PPDBPendaftar, Pengumuman, IdentitasSekolah, Guru, Galeri, Pesan, Profile, MedsosSekolah } from '../types';
 
 // --- Berita Service ---
 export const getPublicBerita = async () => {
@@ -240,6 +241,42 @@ export const saveIdentitasSekolah = async (data: Partial<IdentitasSekolah>) => {
     } else {
         const { data: result, error } = await supabase
             .from('identitas_sekolah')
+            .insert(data)
+            .select()
+            .single();
+        if (error) throw error;
+        return result;
+    }
+};
+
+// --- Medsos Sekolah Service ---
+export const getMedsos = async () => {
+  const { data, error } = await supabase
+    .from('medsos_sekolah')
+    .select('*')
+    .limit(1)
+    .single();
+  
+  if (error && error.code === 'PGRST116') return null; 
+  if (error) throw error;
+  return data as MedsosSekolah;
+};
+
+export const saveMedsos = async (data: Partial<MedsosSekolah>) => {
+    const existing = await getMedsos();
+    
+    if (existing && existing.id) {
+        const { data: result, error } = await supabase
+            .from('medsos_sekolah')
+            .update(data)
+            .eq('id', existing.id)
+            .select()
+            .single();
+        if (error) throw error;
+        return result;
+    } else {
+        const { data: result, error } = await supabase
+            .from('medsos_sekolah')
             .insert(data)
             .select()
             .single();

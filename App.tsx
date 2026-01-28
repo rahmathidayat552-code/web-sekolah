@@ -27,6 +27,7 @@ import ManageGaleri from './pages/admin/ManageGaleri';
 import ManagePesan from './pages/admin/ManagePesan';
 import ManagePPDB from './pages/admin/ManagePPDB';
 import ManageUsers from './pages/admin/ManageUsers';
+import ManageMedsos from './pages/admin/ManageMedsos';
 
 const ProtectedRoute = () => {
   const { session, loading } = useAuth();
@@ -55,6 +56,7 @@ const App: React.FC = () => {
               <Route path="/admin" element={<ProtectedRoute />}>
                 <Route index element={<Dashboard />} />
                 <Route path="identitas" element={<ManageIdentitas />} />
+                <Route path="medsos" element={<ManageMedsos />} />
                 <Route path="berita" element={<ManageBerita />} />
                 <Route path="pengumuman" element={<ManagePengumuman />} />
                 <Route path="jurusan" element={<ManageJurusan />} />

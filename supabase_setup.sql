@@ -111,3 +111,24 @@ CREATE POLICY "Public read identitas" ON identitas_sekolah FOR SELECT USING (tru
 
 DROP POLICY IF EXISTS "Admin update identitas" ON identitas_sekolah;
 CREATE POLICY "Admin update identitas" ON identitas_sekolah FOR ALL USING (auth.role() = 'authenticated');
+
+
+-- 6. TABEL MEDSOS SEKOLAH --
+CREATE TABLE IF NOT EXISTS medsos_sekolah (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    instagram text,
+    whatsapp text,
+    facebook text,
+    youtube text,
+    tiktok text,
+    created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE medsos_sekolah ENABLE ROW LEVEL SECURITY;
+
+-- Policy Medsos Sekolah
+DROP POLICY IF EXISTS "Public read medsos" ON medsos_sekolah;
+CREATE POLICY "Public read medsos" ON medsos_sekolah FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin update medsos" ON medsos_sekolah;
+CREATE POLICY "Admin update medsos" ON medsos_sekolah FOR ALL USING (auth.role() = 'authenticated');

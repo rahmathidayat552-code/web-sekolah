@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Sekolah - Embedded</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#022c22',   /* Emerald 950 (Background Utama) */
+                        surface: '#064e3b',   /* Emerald 900 (Card/Section) */
+                        surface_light: '#065f46', /* Emerald 800 (Hover/Lighter) */
+                        secondary: '#f97316', /* Orange 500 (Aksen/Tombol) */
+                        secondary_hover: '#ea580c', /* Orange 600 */
+                        text_main: '#ecfdf5', /* Emerald 50 (Teks Utama) */
+                        text_muted: '#a7f3d0', /* Emerald 200 (Teks Muted) */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #022c22; }
+        ::-webkit-scrollbar-thumb { background: #065f46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+        
+        .page-section { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .page-section.active { display: block; opacity: 1; }
+        
+        .nav-link.active { color: #f97316; font-weight: bold; }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid #064e3b;
+            border-top: 3px solid #f97316;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-primary text-text_main font-sans min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-surface_light shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo & Identitas -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="router('home')">
+                    <img id="nav-logo" src="" alt="Logo" class="h-8 w-8 object-contain hidden">
+                    <i data-lucide="school" class="h-8 w-8 text-secondary" id="default-logo"></i>
+                    <span id="nav-sekolah-nama" class="font-bold text-lg uppercase tracking-wider text-white">LOADING...</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="router('home')" class="nav-link hover:text-secondary transition" id="link-home">Beranda</button>
+                    <button onclick="router('berita')" class="nav-link hover:text-secondary transition" id="link-berita">Berita</button>
+                    <button onclick="router('jurusan')" class="nav-link hover:text-secondary transition" id="link-jurusan">Jurusan</button>
+                    <button onclick="router('ppdb')" class="nav-link hover:text-secondary transition" id="link-ppdb">PPDB</button>
+                    <button onclick="router('kontak')" class="nav-link hover:text-secondary transition" id="link-kontak">Kontak</button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-surface border-t border-surface_light p-4 space-y-3">
+            <button onclick="router('home')" class="block w-full text-left py-2">Beranda</button>
+            <button onclick="router('berita')" class="block w-full text-left py-2">Berita</button>
+            <button onclick="router('jurusan')" class="block w-full text-left py-2">Jurusan</button>
+            <button onclick="router('ppdb')" class="block w-full text-left py-2">PPDB</button>
+            <button onclick="router('kontak')" class="block w-full text-left py-2">Kontak</button>
+        </div>
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- 1. HALAMAN BERANDA -->
+        <section id="home" class="page-section active">
+            <!-- Hero -->
+            <div class="text-center py-16 bg-surface rounded-3xl mb-12 relative overflow-hidden shadow-2xl border border-surface_light">
+                <div class="relative z-10 px-4">
+                    <h1 class="text-4xl md:text-6xl font-extrabold mb-4">
+                        Selamat Datang di <br>
+                        <span id="hero-sekolah-nama" class="text-secondary">SMK TEKNO</span>
+                    </h1>
+                    <p class="text-xl text-text_muted mb-8 max-w-2xl mx-auto">
+                        Mencetak Generasi Unggul, Berkarakter, dan Siap Kerja.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="router('ppdb')" class="px-8 py-3 bg-secondary hover:bg-secondary_hover text-white rounded-full font-bold transition shadow-lg shadow-orange-900/50 flex items-center gap-2">
+                            Daftar Sekarang <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="router('jurusan')" class="px-8 py-3 border-2 border-surface_light hover:bg-surface_light text-white rounded-full font-bold transition">
+                            Lihat Jurusan
+                        </button>
+                    </div>
+                </div>
+                <!-- Decoration -->
+                <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+                <div class="bg-surface p-6 rounded-xl border border-surface_light text-center">
+                    <i data-lucide="users" class="mx-auto text-secondary w-8 h-8 mb-2"></i>
+                    <h3 class="text-2xl font-bold" id="stat-guru">0</h3>
+                    <p class="text-xs uppercase text-text_muted">Guru & Staff</p>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-surface_light text-center">
+                    <i data-lucide="book-open" class="mx-auto text-secondary w-8 h-8 mb-2"></i>
+                    <h3 class="text-2xl font-bold" id="stat-jurusan">0</h3>
+                    <p class="text-xs uppercase text-text_muted">Jurusan</p>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-surface_light text-center">
+                    <i data-lucide="trophy" class="mx-auto text-secondary w-8 h-8 mb-2"></i>
+                    <h3 class="text-2xl font-bold">A</h3>
+                    <p class="text-xs uppercase text-text_muted">Akreditasi</p>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-surface_light text-center">
+                    <i data-lucide="smile" class="mx-auto text-secondary w-8 h-8 mb-2"></i>
+                    <h3 class="text-2xl font-bold">100%</h3>
+                    <p class="text-xs uppercase text-text_muted">Kepuasan</p>
+                </div>
+            </div>
+
+            <!-- Highlights Berita -->
+            <div class="mb-8 flex justify-between items-end">
+                <h2 class="text-2xl font-bold border-l-4 border-secondary pl-4">Berita Terbaru</h2>
+                <button onclick="router('berita')" class="text-secondary text-sm hover:underline">Lihat Semua</button>
+            </div>
+            <div id="home-news-grid" class="grid md:grid-cols-3 gap-6">
+                <!-- Injected via JS -->
+                <div class="col-span-3 text-center py-8 text-text_muted">Memuat berita...</div>
+            </div>
+        </section>
+
+        <!-- 2. HALAMAN BERITA -->
+        <section id="berita" class="page-section">
+            <h2 class="text-3xl font-bold text-center mb-2">Berita & Artikel</h2>
+            <p class="text-center text-text_muted mb-8">Kabar terbaru dari lingkungan sekolah.</p>
+            
+            <div id="berita-list" class="grid md:grid-cols-3 gap-6">
+                 <!-- Injected via JS -->
+                 <div class="col-span-3 text-center py-20">
+                    <div class="loader mx-auto"></div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- 3. HALAMAN JURUSAN -->
+        <section id="jurusan" class="page-section">
+             <h2 class="text-3xl font-bold text-center mb-2">Kompetensi Keahlian</h2>
+             <p class="text-center text-text_muted mb-12">Pilih jurusan sesuai minat dan bakatmu.</p>
+             
+             <div id="jurusan-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <!-- Injected via JS -->
+                 <div class="col-span-3 text-center py-20">
+                    <div class="loader mx-auto"></div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- 4. HALAMAN PPDB -->
+        <section id="ppdb" class="page-section">
+            <div class="max-w-3xl mx-auto bg-surface rounded-2xl border border-surface_light shadow-2xl overflow-hidden">
+                <div class="bg-secondary p-8 text-center">
+                    <h2 class="text-2xl font-bold text-white">Formulir PPDB Online</h2>
+                    <p class="text-orange-100">Daftar sekarang untuk Tahun Ajaran Baru</p>
+                </div>
+                
+                <form id="ppdb-form" class="p-8 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-text_muted">Nama Lengkap</label>
+                            <input type="text" name="nama" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-text_muted">Asal Sekolah</label>
+                            <input type="text" name="asal_sekolah" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary transition">
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-text_muted">Nomor WhatsApp</label>
+                            <input type="tel" name="no_hp" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-text_muted">Pilihan Jurusan</label>
+                            <select name="jurusan_pilihan" id="ppdb-jurusan-select" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary transition">
+                                <option value="">-- Pilih Jurusan --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-text_muted">Alamat Lengkap</label>
+                        <textarea name="alamat" rows="3" class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary transition"></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-submit-ppdb" class="w-full bg-secondary hover:bg-secondary_hover text-white font-bold py-3 rounded-lg transition shadow-lg flex justify-center items-center gap-2">
+                        Kirim Pendaftaran
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- 5. HALAMAN KONTAK -->
+        <section id="kontak" class="page-section">
+            <h2 class="text-3xl font-bold text-center mb-8">Hubungi Kami</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Info -->
+                <div class="bg-surface p-6 rounded-xl border border-surface_light space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-surface_light p-3 rounded-lg text-secondary"><i data-lucide="map-pin"></i></div>
+                        <div>
+                            <h4 class="font-bold text-text_muted uppercase text-xs mb-1">Alamat</h4>
+                            <p id="contact-alamat">Memuat...</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-surface_light p-3 rounded-lg text-secondary"><i data-lucide="phone"></i></div>
+                        <div>
+                            <h4 class="font-bold text-text_muted uppercase text-xs mb-1">Telepon</h4>
+                            <p id="contact-telp">Memuat...</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-surface_light p-3 rounded-lg text-secondary"><i data-lucide="mail"></i></div>
+                        <div>
+                            <h4 class="font-bold text-text_muted uppercase text-xs mb-1">Email</h4>
+                            <p id="contact-email">Memuat...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="md:col-span-2 bg-surface p-6 rounded-xl border border-surface_light">
+                    <form id="contact-form" class="space-y-4">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <input type="text" name="nama" placeholder="Nama Anda" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary">
+                            <input type="email" name="email" placeholder="Email" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary">
+                        </div>
+                        <input type="text" name="subjek" placeholder="Subjek" required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary">
+                        <textarea name="isi" rows="4" placeholder="Pesan Anda..." required class="w-full bg-primary border border-surface_light rounded-lg px-4 py-3 text-white focus:outline-none focus:border-secondary"></textarea>
+                        <button type="submit" id="btn-submit-pesan" class="bg-secondary hover:bg-secondary_hover text-white font-bold px-6 py-3 rounded-lg transition">
+                            Kirim Pesan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-surface border-t border-surface_light py-8 text-center text-sm text-text_muted mt-auto">
+        <p>&copy; <span id="year"></span> <span id="footer-sekolah">SMK TEKNO</span>. All Rights Reserved.</p>
+    </footer>
+
+    <!-- TOAST NOTIFICATION (Simple) -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-white text-primary px-6 py-3 rounded-lg shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-[100] font-bold border-l-4 border-secondary">
+        Pesan Notifikasi
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. INIT SUPABASE
+        const SUPABASE_URL = 'https://cfikksowpygcqyvsldup.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmaWtrc293cHlnY3F5dnNsZHVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MjA5ODAsImV4cCI6MjA4NTA5Njk4MH0.EwuqxiZ0PZ7F8LFd0fm9K2LbmYfRiPkN6xVmKdPNCYw';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Global Data Cache
+        let cachedJurusan = [];
+
+        // 2. ROUTER LOGIC
+        function router(pageId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(el => {
+                el.classList.remove('active');
+                // Scroll to top
+                window.scrollTo(0, 0);
+            });
+            
+            // Show target section
+            document.getElementById(pageId).classList.add('active');
+
+            // Update Nav State
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            const activeLink = document.getElementById('link-' + pageId);
+            if(activeLink) activeLink.classList.add('active');
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // 3. DATA FETCHING
+        async function loadIdentitas() {
+            const { data, error } = await supabase.from('identitas_sekolah').select('*').limit(1).single();
+            if (data) {
+                document.getElementById('nav-sekolah-nama').innerText = data.nama_sekolah;
+                document.getElementById('hero-sekolah-nama').innerText = data.nama_sekolah;
+                document.getElementById('footer-sekolah').innerText = data.nama_sekolah;
+                document.getElementById('contact-alamat').innerText = data.alamat;
+                document.getElementById('contact-email').innerText = data.email;
+                document.getElementById('contact-telp').innerText = data.no_tlp;
+
+                if (data.logo_sekolah) {
+                    document.getElementById('nav-logo').src = data.logo_sekolah;
+                    document.getElementById('nav-logo').classList.remove('hidden');
+                    document.getElementById('default-logo').classList.add('hidden');
+                }
+            }
+        }
+
+        async function loadStats() {
+            const { count: guruCount } = await supabase.from('guru').select('*', { count: 'exact', head: true });
+            if (guruCount !== null) document.getElementById('stat-guru').innerText = guruCount;
+
+            const { count: jurusanCount } = await supabase.from('jurusan').select('*', { count: 'exact', head: true });
+            if (jurusanCount !== null) document.getElementById('stat-jurusan').innerText = jurusanCount;
+        }
+
+        async function loadBerita() {
+            const { data, error } = await supabase.from('berita').select('*').eq('status', 'publish').order('created_at', { ascending: false });
+            
+            const containerHome = document.getElementById('home-news-grid');
+            const containerPage = document.getElementById('berita-list');
+            
+            let html = '';
+
+            if (data && data.length > 0) {
+                data.forEach(item => {
+                    const date = new Date(item.created_at).toLocaleDateString('id-ID');
+                    const img = item.thumbnail || `https://ui-avatars.com/api/?name=${item.judul}&background=065f46&color=fff`;
+                    
+                    const card = `
+                        <div class="bg-surface rounded-xl overflow-hidden border border-surface_light hover:border-secondary transition group">
+                            <div class="h-48 overflow-hidden">
+                                <img src="${img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                            </div>
+                            <div class="p-5">
+                                <div class="text-xs text-secondary mb-2 font-bold">${date}</div>
+                                <h3 class="text-lg font-bold text-white mb-2 line-clamp-2">${item.judul}</h3>
+                                <p class="text-sm text-text_muted line-clamp-3">${item.konten}</p>
+                            </div>
+                        </div>
+                    `;
+                    html += card;
+                });
+            } else {
+                html = '<div class="col-span-3 text-center text-text_muted">Belum ada berita.</div>';
+            }
+
+            containerPage.innerHTML = html;
+            // Home only shows first 3
+            containerHome.innerHTML = data && data.length > 0 
+                ? data.slice(0, 3).map((item, idx) => {
+                    // Re-render simple version for home
+                     const date = new Date(item.created_at).toLocaleDateString('id-ID');
+                     const img = item.thumbnail || `https://ui-avatars.com/api/?name=${item.judul}&background=065f46&color=fff`;
+                     return `
+                        <div class="bg-surface rounded-xl overflow-hidden border border-surface_light flex flex-col">
+                            <img src="${img}" class="h-40 w-full object-cover">
+                            <div class="p-4 flex-1">
+                                <div class="text-xs text-secondary mb-1">${date}</div>
+                                <h4 class="font-bold text-white line-clamp-2">${item.judul}</h4>
+                            </div>
+                        </div>
+                     `
+                }).join('')
+                : html;
+        }
+
+        async function loadJurusan() {
+            const { data, error } = await supabase.from('jurusan').select('*').order('nama_jurusan', { ascending: true });
+            cachedJurusan = data || [];
+            
+            const container = document.getElementById('jurusan-list');
+            const selectPPDB = document.getElementById('ppdb-jurusan-select');
+            
+            let html = '';
+            let options = '<option value="">-- Pilih Jurusan --</option>';
+
+            if (data && data.length > 0) {
+                data.forEach(item => {
+                    const icon = item.icon ? `<img src="${item.icon}" class="w-10 h-10 object-contain">` : `<i data-lucide="briefcase" class="w-8 h-8 text-secondary"></i>`;
+                    
+                    html += `
+                        <div class="bg-surface p-6 rounded-xl border border-surface_light hover:border-secondary transition group relative overflow-hidden">
+                             <div class="w-16 h-16 bg-surface_light rounded-xl flex items-center justify-center mb-4 text-secondary">
+                                ${icon}
+                             </div>
+                             <h3 class="text-xl font-bold text-white mb-1 group-hover:text-secondary">${item.nama_jurusan}</h3>
+                             <span class="text-xs font-bold bg-surface_light px-2 py-1 rounded mb-4 inline-block text-secondary">${item.singkatan}</span>
+                             <p class="text-text_muted text-sm line-clamp-3 mb-4">${item.deskripsi || 'Kompetensi keahlian unggulan.'}</p>
+                             <button onclick="router('ppdb')" class="text-secondary text-sm font-bold flex items-center gap-1">Daftar <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                        </div>
+                    `;
+
+                    options += `<option value="${item.id}">${item.nama_jurusan}</option>`;
+                });
+            } else {
+                html = '<div class="col-span-3 text-center text-text_muted">Belum ada data jurusan.</div>';
+            }
+
+            container.innerHTML = html;
+            selectPPDB.innerHTML = options;
+            lucide.createIcons(); // Re-init icons for dynamic content
+        }
+
+        // 4. FORM HANDLERS
+        document.getElementById('ppdb-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-ppdb');
+            const originalText = btn.innerText;
+            btn.innerText = 'Mengirim...';
+            btn.disabled = true;
+
+            const formData = new FormData(e.target);
+            const payload = Object.fromEntries(formData.entries());
+            // Add default status
+            payload.status = 'baru';
+
+            try {
+                const { error } = await supabase.from('ppdb_pendaftar').insert(payload);
+                if (error) throw error;
+                showToast('Pendaftaran Berhasil! Tunggu info selanjutnya via WA.');
+                e.target.reset();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal mendaftar. Coba lagi.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-pesan');
+            const originalText = btn.innerText;
+            btn.innerText = 'Mengirim...';
+            btn.disabled = true;
+
+            const formData = new FormData(e.target);
+            const payload = Object.fromEntries(formData.entries());
+            payload.status = 'unread';
+            // Add dummy phone if not present in form but required by schema, usually Contact form has no phone field in simple version but schema has no_hp required? 
+            // Based on types.ts: Pesan interface has no_hp. Let's assume the simplified form doesn't have it or we add a hidden/default.
+            // Adjusting payload to match schema:
+            payload.no_hp = '-'; 
+
+            try {
+                const { error } = await supabase.from('pesan').insert(payload);
+                if (error) throw error;
+                showToast('Pesan Terkirim!');
+                e.target.reset();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal mengirim pesan.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // 5. INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            document.getElementById('year').innerText = new Date().getFullYear();
+            
+            // Initial Router State
+            router('home');
+            
+            // Load Data
+            loadIdentitas();
+            loadStats();
+            loadBerita();
+            loadJurusan();
+        });
+
+    </script>
+</body>
+</html>

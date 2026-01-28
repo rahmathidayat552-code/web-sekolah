@@ -1,3 +1,4 @@
+
 export interface Berita {
   id: string;
   judul: string;
@@ -88,4 +89,13 @@ export interface IdentitasSekolah {
   nip_kepsek: string;
   foto_kepsek: string | null;
   logo_sekolah: string | null;
+}
+
+export interface MedsosSekolah {
+  id?: string;
+  instagram: string | null;
+  whatsapp: string | null;
+  facebook: string | null;
+  youtube: string | null;
+  tiktok: string | null;
 }
